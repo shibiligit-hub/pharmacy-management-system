@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Stock Form</title>
+
+<style>
+body{
+	background-color:#F0F0F2;
+    font-family:Arial,sans-serif;
+}
+
+.all{
+	background-color:white;
+    width: 550px;               
+    margin: 100px auto;
+    padding: 30px;               
+    color:black;
+	border-radius:20px;
+}
+.all{
+    border:5px solid black !important;
+}
+
+.form-group{
+    display: flex;
+    align-items: center;	
+    margin: 20px 0;             
+}
+
+label{
+    width: 200px;               
+    font-size: 20px;            
+}
+
+input{
+	background-color:white;
+    flex: 1;
+    padding: 10px;               
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.btn{
+    text-align: center;
+    margin-top: 25px;
+}
+
+button{
+    padding: 12px 25px;          
+    font-size: 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: cornflowerblue;
+    	color:white;
+}
+
+h1{
+    text-align: center;
+    font-size:50px;              
+}
+</style>
+</head>
+
+<body>
+
+<form action="AddSupplier" method="Post">
+<h1>Add Supplier</h1>
+
+<div class="all">
+
+<div class="form-group">
+<label>Supplier Name</label>
+<input type="text" name="supplierna" required>
+</div>
+
+<div class="form-group">
+<label>Product Name</label>
+<input type="text" name="product" required>
+</div>
+
+<div class="form-group">
+<label>Company Name</label>
+<input type="text" name="companynam" required>
+</div>
+
+<div class="form-group">
+<label>Phone</label>
+<input type="tel" name="phone" required>
+</div>
+
+<div class="form-group">
+<label>Email</label>
+<input type="email" name="email" required pattern="[a-zA-Z0-9._%+-]+@gmail\.com"
+title="Please enter a valid @gmail.com address">
+</div>
+
+
+<div class="form-group">
+<label>Gst No</label>
+<input type="number" name="gstnu" required>
+</div>
+<div class="btn">
+<button type="submit">Submit</button>
+</div>
+
+</div>
+</form>
+
+</body>
+</html>

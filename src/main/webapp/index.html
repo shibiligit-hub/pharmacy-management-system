@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Pharmacy Management System</title>
+
+<style>
+
+
+.dropdown{
+    position:relative;
+    display:inline-block;
+}
+
+.dropbtn{
+    width:220px;
+    height:55px;
+    background-color:white;
+    border:none;
+    outline:none;
+    font-size:17px;
+    font-weight:bold;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.dropdown-content{
+    display:none;
+    position:absolute;
+    min-width:220px;
+    box-shadow:0px 4px 8px rgba(0,0,0,0.3);
+    z-index:1000;
+}
+
+.dropdown-content a{
+    display:block;
+    padding:12px;
+    text-decoration:none;
+    color:black;
+    font-size:15px;
+}
+.sub-dropdown{
+    position:relative;
+}
+
+.sub-content{
+    display:none;
+    position:absolute;
+    left:220px;
+    top:0;
+    min-width:220px;
+    background:white;
+}
+
+.sub-dropdown:hover .sub-content{
+    display:block;
+}
+
+.dropdown-content a:hover{
+    background-color:#f1f1f1;
+}
+
+.dropdown:hover .dropdown-content{
+    display:block;
+}
+
+.content{
+    width:100%;
+    margin-top:40px;
+    display:flex;
+    justify-content:center;
+}
+
+#frame{
+    width:100%;
+    max-width:923px;
+    height:900px;
+    border:none;
+    background:transparent;
+}
+
+</style>
+
+</head>
+
+<body>
+<div class="static">
+<h1>Pharmacy Management System</h1>
+</div>
+<div class="menu">
+
+    <div class="dropdown">
+        <button class="dropbtn">Purchase Management</button>
+
+        <div class="dropdown-content">
+            <a href="#" onclick="loadPage('AddSupplier.html')">
+                Add Supplier
+            </a>
+
+            <a href="#" onclick="loadPage('ViewSupplier.jsp')">
+                View Supplier
+            </a>
+
+            <a href="#" onclick="loadPage('AddPurchase.jsp')">
+                Add Purchase
+            </a>
+
+            <a href="#" onclick="loadPage('ViewPurchase.jsp')">
+                View Purchase
+            </a>
+        </div>
+    </div>
+
+
+    <div class="dropdown">
+        <button class="dropbtn">Sales Management</button>
+
+        <div class="dropdown-content">
+            <a href="#" onclick="loadPage('AddSales.jsp')">
+                Add Sales
+            </a>
+
+            <a href="#" onclick="loadPage('ViewSales.jsp')">
+                View Sales
+            </a>
+        </div>
+    </div>
+
+
+
+    <!-- Stock Management -->
+    <div class="dropdown">
+        <button class="dropbtn">Stock Management</button>
+
+        <div class="dropdown-content">
+            <a href="#" onclick="loadPage('ViewStock.jsp')">
+                View Stock
+            </a>
+        </div>
+    </div>
+
+
+
+    <!-- Reports -->
+    <div class="dropdown">
+        <button class="dropbtn">Reports</button>
+
+        <div class="dropdown-content">
+        <div class="sub-dropdown">
+            <a href="#">
+                Monthly Reports
+            </a>
+            		<div class="sub-content">
+            			<a href="#" onclick="loadPage('MonthlySalesReport.jsp')">
+					Sales Report</a>
+            			<a href="#" onclick="loadPage('MonthlyPurchaseReport.jsp')">Purchase Report</a>
+            			<a href="#" onClick="loadPage('FinalResult.jsp')" >Final Report</a>
+            		</div>
+		</div>
+		<div class="sub-dropdown">
+            <a href="#" onclick="loadPage('ViewSales.jsp')">
+                Yearly Reports
+            </a>
+            <div class="sub-content">
+            <a href="#" onclick=" loadPage('YearlySales.jsp')">Sales Report</a>
+            			<a href="#" onclick="loadPage('YearPurchase.jsp')">Purchase Report</a>
+            			<a href="#" onClick="loadPage('YearFinalResult.jsp')" >Final Report</a>
+            		</div>
+		   </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- Settings -->
+    <div class="dropdown">
+        <button class="dropbtn">Settings</button>
+
+        <div class="dropdown-content">
+            <a href="#" onclick="loadPage('Profile.jsp')">
+                Profile
+            </a>
+
+            <a href="Login.html">
+                Logout
+            </a>
+        </div>
+    </div>
+
+</div>
+
+
+
+<!-- CONTENT -->
+<div class="content">
+
+    <iframe
+        id="frame"
+        name="frame">
+    </iframe>
+
+</div>
+
+
+
+<script>
+
+function loadPage(page){
+    document.getElementById("frame").src = page;
+}
+
+
+</script>
+
+</body>
+</html>

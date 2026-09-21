@@ -1,0 +1,32 @@
+@charset "UTF-8";
+
+body{
+	background-color:darkolivegreen;
+	color:white;
+	margin:0;
+	padding:0;
+}
+
+.dropdown{
+    position:relative;
+}
+
+.dropdown button{
+    width:220px;
+    height:55px;
+    background:palevioletred;
+    color:white;
+    border:none;
+    border-radius:8px;
+}
+
+.dropdown-content{
+    display:none;
+    position:absolute;
+    background:white;
+    min-width:220px;
+}
+
+.dropdown:hover .dropdown-content{
+    display:block;
+}
