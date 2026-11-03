@@ -1,6 +1,5 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="hospital.DBConnection" %>
-
 <%
 Connection conn = null;
 PreparedStatement ps = null;
@@ -9,24 +8,34 @@ PreparedStatement ps2 = null;
 PreparedStatement ps8 = null;
 PreparedStatement ps11 = null;
 PreparedStatement invoi = null;
+PreparedStatement pname = null;
 
+ResultSet rname = null;
 ResultSet rs = null;
 ResultSet rs1 = null;
 ResultSet rs2 = null;
 ResultSet inv = null;
 
 String product = request.getParameter("product");
+String barcode = request.getParameter("barcode");
+String stockId = request.getParameter("stockId");
 String cname = "";
 String dname = "";
 
 try {
 
     conn = DBConnection.getConnection();
-
     ps = conn.prepareStatement(
-    	    "SELECT PRODUCT_NAME FROM STOCKS WHERE PRODUCT_QUANTITY > 0"
+    	    "SELECT DISTINCT S_ID,PRODUCT_NAME FROM STOCKS WHERE PRODUCT_QUANTITY > 0"
     );
     rs = ps.executeQuery();
+    
+    pname = conn.prepareStatement("SELECT PRODUCT_NAME FROM STOCKS WHERE S_ID = ?");
+    pname.setString(1, stockId);
+    rname = pname.executeQuery();
+    if(rname.next()){
+    		product = rname.getString("PRODUCT_NAME");
+    }
     
     ps11 = conn.prepareStatement("DELETE FROM PURCHASE WHERE QUANTITY <= 0");
     ps11.executeUpdate();
@@ -39,12 +48,12 @@ try {
 		dname = rs8.getString("DOCTOR_NAME");
 	}
 	
-    if (product != null && !product.trim().isEmpty()) {
+    if (stockId != null && !stockId.trim().isEmpty()) {
 
         ps1 = conn.prepareStatement(
-            "SELECT PRODUCT_QUANTITY FROM STOCKS WHERE PRODUCT_NAME=?"
+            "SELECT PRODUCT_QUANTITY FROM STOCKS WHERE S_ID=?"
         );
-        ps1.setString(1, product);
+        ps1.setInt(1, Integer.parseInt(stockId));
         rs1 = ps1.executeQuery();
 
         ps2 = conn.prepareStatement(
@@ -52,29 +61,53 @@ try {
         );
         ps2.setString(1, product);
         rs2 = ps2.executeQuery();
-
+        
         invoi = conn.prepareStatement(
             "SELECT INVOICE FROM PURCHASE WHERE PRODUCT_NAME=?"
         );
         invoi.setString(1, product);
         inv = invoi.executeQuery();
-    }
-%>
+    }else{
+    		ps1 = conn.prepareStatement(
+             "SELECT PRODUCT_QUANTITY FROM STOCKS WHERE PRODUCT_NAME=?"
+        );
+        ps1.setString(1, product);
+        rs1 = ps1.executeQuery();
 
+        ps2 = conn.prepareStatement(
+                "SELECT UNIT_COST_PRICE FROM PURCHASE WHERE PRODUCT_NAME=?"
+        );
+        ps2.setString(1, product);
+        rs2 = ps2.executeQuery();
+
+        invoi = conn.prepareStatement(
+                "SELECT INVOICE FROM PURCHASE WHERE PRODUCT_NAME=?"
+        );
+        invoi.setString(1, product);
+        inv = invoi.executeQuery();
+    }
+    PreparedStatement psg = conn.prepareStatement("SELECT COUNT(PRODUCT_NAME) FROM STOCKS");
+    	ResultSet rsg = psg.executeQuery();
+    	PreparedStatement supp = null;
+    	ResultSet suppre = null;
+    	if(stockId != null && !stockId.trim().isEmpty()) {
+         supp = conn.prepareStatement("SELECT SUPPLIER_NAME,COMPANY_NAME FROM STOCKS WHERE S_ID = ?");
+        supp.setInt(1,Integer.parseInt(stockId));
+        suppre = supp.executeQuery();
+    	}
+%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Add Sales</title>
-
+<title>Add Sales</title>	
 <style>
 body{
     font-family:Arial,sans-serif;
 }
-
 .all{
     width:550px;
-    margin:50px auto;
+    margin:20px auto;
     padding:30px;
     border:5px solid black;
     border-radius:20px;
@@ -177,28 +210,23 @@ function Calc(){
 
 <div class="all">
 
-<form method="post">
+<form method="post"> 
 
     <div class="form-group">
         <label>Product Name</label>
 
 <select name="product"
-        onchange="window.location='AddSales.jsp?product='+encodeURIComponent(this.value)">
-            <option value="">Select Product</option>
+        onchange="window.location='AddSales.jsp?stockId='+this.value">
+    <option value="">Select Product</option>
 
-            <% while(rs.next()) { %>
+    <% while(rs.next()) { %>
+        <option value="<%= rs.getInt("S_ID") %>"
+        <%=stockId!= null && stockId.equals(String.valueOf(rs.getInt("S_ID"))) ? "selected " : "" %>>
+            <%= rs.getString("PRODUCT_NAME") %>
+        </option>
+    <% } %>
+</select>
 
-            <option
-                value="<%= rs.getString("PRODUCT_NAME") %>"
-                <%= (product != null &&
-                     rs.getString("PRODUCT_NAME").equals(product))
-                     ? "selected" : "" %>>
-                <%= rs.getString("PRODUCT_NAME") %>
-            </option>
-
-            <% } %>
-
-        </select>
     </div>
 
     <% if(rs1 != null && rs1.next()) { %>
@@ -222,7 +250,7 @@ function Calc(){
             type="number"
             id="qtyi"
             name="qty"
-            onkeyup="Calc()"
+            onkeyup="Calc();checking();"
             required>
     </div>
 
@@ -255,7 +283,7 @@ function Calc(){
             readonly>
     </div>
 
-    <% if(inv != null && inv.next()) { %>
+    <% if(stockId != null && inv.next()) { %>
 
     <div class="form-group">
         <label>Invoice Number</label>
@@ -269,17 +297,41 @@ function Calc(){
 
     <% } %>
 
+<%if(stockId != null){while(suppre.next()){ %>
     <div class="form-group">
-        <label>Patient Name</label>
+        <label>Supplier Name</label>
+
+        <input
+            type="text"
+            name="sname"
+            id="snmae"
+            value="<%=suppre.getString("SUPPLIER_NAME") %>"
+	       	required>
+    </div>
+   
+     <div class="form-group">
+        <label>Company Name</label>
+
+        <input
+            type="text"
+            name="company"
+            id="company"
+            value="<%=suppre.getString("COMPANY_NAME") %>"
+	       	required>
+    </div>
+<%} }%>
+
+    <div class="form-group">
+        <label>Customer Name</label>
 
         <input
             type="text"
             name="cname"
-            id="cname"
+            id = "cname"
             value="<%=cname %>"
-	       	required>
+            required>
     </div>
-
+    
     <div class="form-group">
         <label>Doctor Name</label>
 
@@ -291,14 +343,20 @@ function Calc(){
             required>
     </div>
     <div class="btn">
+    <%int count = 0;%>
+    <% if(rsg.next()){
+    		count = rsg.getInt(1);
+    }
+    if(count > 1){
+    	%>
 	<button type="submit"
         formaction="Addmore"
         style="background-color:#556b2f">
     AddMore
 	</button>
-
+<%} %>
 	<button type="submit"
-        formaction="Submit">
+        formaction="AddSales">
     Submit
 	</button>
     </div>
@@ -332,6 +390,17 @@ if(rs7.next()){
 <%}while(rs7.next()); %>
 <% } %>
 </table>
+<script>
+function checking(){
+	let avaiqnty = parseFloat(document.getElementById("availableQty").value);
+	let inpqty = parseFloat(document.getElementById("qtyi").value);
+	if(inpqty <=0 || inpqty > avaiqnty ){
+		alert("Insufficient Quantity");
+		document.getElementById("qtyi").value=" ";
+		document.getElementById("pricer").value=" ";
+	}
+}
+</script>
 </body>
 </html>
 
