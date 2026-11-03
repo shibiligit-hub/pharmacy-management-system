@@ -1,8 +1,10 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="hospital.DBConnection" %>
+<%@  page import="java.time.LocalDate" %>
 <%
 int recordsPage = 5;
 int currentPage = 1;
+LocalDate today = LocalDate.now();
 if(request.getParameter("page")!= null){
 	currentPage = Integer.parseInt(request.getParameter("page"));
 }
@@ -37,6 +39,7 @@ try{
 if(escount.next()){
 	totalRecords = escount.getInt(1);
 }
+int totalPages = (int) Math.ceil((double) totalRecords / recordsPage);
 %>
 <!DOCTYPE html>
 <html>
@@ -58,12 +61,6 @@ if(escount.next()){
 	margin-left:20px;
 	margin-top:10px;
 }
-table{
-    width:90%;
-    margin:20px auto;
-    border-collapse:collapse;
-    background:white;
-}
 .tentries{	
 	display: flex;
     margin-top: 35px;
@@ -77,6 +74,13 @@ table{
     object-fit: contain;
     margin-top: 37px;
 }
+table{
+    width:90%;
+    margin:20px auto;
+    border-collapse:collapse;
+    background:white;
+}
+
 th{
 	background-color:blue;
 	color:white;
@@ -89,7 +93,7 @@ th{
 
 td{
     text-align:center;
-    padding:0px 20px;
+    padding:20px 35px;
     font-weight:500;
     font-size:18px;    
 	border: 1px solid black;    
@@ -109,7 +113,7 @@ td{
 	display:block;
     margin:20px auto;
 }
-input[type="text"]{
+.typtex{
 	width:500px;
 	height:35px;
 	font-size:19px;
@@ -154,7 +158,6 @@ td:last-child {
 .prev-btn{
 	margin-left: 56px;
 }
-
 .next-btn{
     justify-self:end;
     margin-right:75px;
@@ -169,14 +172,13 @@ td:last-child {
 }
 .button-style{
 	padding:10px 20px;
-    font-size:15px;
-    border-radius:5px;
-    cursor:pointer;
-	display:block;
-	margin:20px auto;
-	font-size: 19px;
-	width: 52px;
-    height: 40px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    font-size: 19px;
+    width: 10px;
+    height: 20px;
 }
 .label-style{
 }
@@ -198,51 +200,53 @@ if(rs.next()){
 </div>
 <form action="ViewStock.jsp" method="get">
 <input type="text" placeholder='search by productName'
-name="product" id="stk" value="<%= product != null ? product : "" %>
-">
+name="product" id="stk" class="typtex" value="<%= product != null ? product : "" %>">
 <button class="search" type="submit">Search</button>
 <button class="reset" type="reset" onClick="window.location.href='ViewStock.jsp'">Reset</button>
-</div>
 </form>
-
+</div>
 <label class="tentries">Total Entries : <%= totalRecords %></label>
 <table>
 <tr>
 <th>SL No</th>
-<th></th>
 <th>Product Name</th>
 <th>Quantity</th>
 <th>Purchase Date</th>
 <th>Manfacturing Date</th>
 <th>Expiry Date</th>
 <th>Supplier Name</th>
+<th>Company Name</th>
 <th>Rack No</th>
+<th>Barcode</th>
 </tr>
 <%int slno= start+1;
  %>
 <%do{ %>
 <tr>
 <td><%= slno++%></td>
-<td>
-<form action="EditStocks.jsp" method="get">
-<input type="hidden" name="ID" value="<%=rs.getInt("S_ID") %>">
-<button class="hello">
-<img src="Edit.jpg" style="width:30px;"></button>
-</form>
-<form action="DeleteStocks" method="post">
-<input type="hidden" value="<%= rs.getInt("S_ID")%>" name="ID">
-<button class="hai" type="submit" onClick="return confirm('Are you sure you want to delete this Stock?')">
-<img src="Delete.jpg" style="width:30px;">
-</button>
-</form>
-</td>
+<% 
+Date exp = Date.valueOf(rs.getString("EXPIRY_DATE"));
+LocalDate expdate = exp.toLocalDate();%>
+<% LocalDate monthexpiry = today.plusMonths(1); 
+   LocalDate tendayBefore = today.plusDays(10);
+%>
 <td><%= rs.getString("PRODUCT_NAME") %></td>
 <td><%= rs.getString("PRODUCT_QUANTITY") %></td>
 <td><%= rs.getString("PURCHASE_DATE") %></td>
 <td><%= rs.getString("MANUFACTURING_DATE") %></td>
-<td><%= rs.getString("EXPIRY_DATE") %></td>
+	<% if(expdate.isBefore(today)){ %>
+		<td style="background-color:red; color:white;">Expired</td>
+	<%}else if(!expdate.isAfter(monthexpiry)){ %>
+		<td style="background-color:yellow; color:black;"><%=expdate %></td>
+	<%}else if(!expdate.isEqual(today) && !expdate.isAfter(tendayBefore)){ %>
+		<td style="background-color:red; color:white;"><%=expdate %></td>
+	<%}else{ %>
+		<td><%=exp %></td>
+	<%} %>
 <td><%= rs.getString("SUPPLIER_NAME") %></td>
+<td><%= rs.getString("COMPANY_NAME") %></td>
 <td><%= rs.getString("RACK_NO") %></td>
+<td><%=	rs.getString("BARCODE") %></td>
 </tr>
 <%}while(rs.next());%>
 </table>
@@ -254,7 +258,7 @@ name="product" id="stk" value="<%= product != null ? product : "" %>
 </a>
 <%} %>
 </div>
-<button class="button-style"><%= currentPage %></button>
+<input type="text" id="inpval" class="button-style" value="<%= currentPage %>" onchange="changing()">
 <%
 if(totalRecords > currentPage * recordsPage){
 %>
@@ -267,7 +271,7 @@ if(totalRecords > currentPage * recordsPage){
 }else{
 %>
 <h2 style="text-align:center; margin-top:50px;">
-    No Data Found
+    No Stock Data Found
 </h2>
 <a href="ViewStock.jsp">
     <button class="back-btn" >
@@ -276,8 +280,19 @@ if(totalRecords > currentPage * recordsPage){
 </a>
 <%}%>
 </div>
-<%
-%>
+<script>
+function changing(){
+	let inpv = document.getElementById("inpval").value;
+	let totalPages = <%= totalPages %>;
+	if(inpv <= totalPages){
+	window.location.href="ViewStock.jsp?page=" + inpv;
+	}else{
+		alert("No Pages Found");
+		let inpv = document.getElementById("inpval").value = 1;
+		window.location.href="ViewStock.jsp?page=" + inpv;
+	}
+}
+</script>
 </body>
 </html>
 <%
